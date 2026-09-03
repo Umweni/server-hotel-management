@@ -14,6 +14,10 @@ export const getRoom = async (req, res) => {
 //create room
 export const createRoom = async (req, res) => {
     try {
+        const {roomNumber, price, category, capacity, bedType, floor, description, size } = req.body;
+        if(!roomNumber || !price || !category || !capacity || !bedType || !floor ){
+            return res.status(400).send({status: 'error', msg: 'fill required field'})
+        }
         const room = new Room(req.body);
         await room.save();
     } catch (error) {
@@ -47,6 +51,17 @@ export const updateRoom = async (req, res) => {
     console.log(error)
     return res.status(500).send({status: 'error', msg: 'server error'})
    }
+}
+
+//check all available rooms
+export const checkAvailableRooms = async (req, res) => {
+    try{
+        const availableRooms = await Room.find({status: 'AVAILABLE'});
+        res.status(200).send({status: 'ok', msg: 'success', data: availableRooms})
+    }catch (error) {
+        console.error(error);
+        return res.status(500).send({status: 'error', msg: 'server error'})
+    }
 }
 
 //Delete a room

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const bookingSchema = new mongoose.Schema({
-    room:{
+    roomId:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Room',
         required: true

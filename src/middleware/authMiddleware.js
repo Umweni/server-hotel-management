@@ -17,7 +17,13 @@ export const validate_user = async (req, res, next) => {
     if (!user || user.status !== 'ACTIVE') {
         return res.status(401).send({status: 'error', msg: 'Not authorized'})
     }
-    req.user = user;
+    req.user = {
+        id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        role: user.role,
+        status: user.status
+    };
     next();
 }catch (error) {
     console.error(error);

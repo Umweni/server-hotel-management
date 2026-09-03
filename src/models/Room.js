@@ -8,11 +8,6 @@ const roomSchema = new mongoose.Schema({
         trim: true
     },
 
-    name:{
-        type: String,
-        required: true,
-        trim: true
-    },
 
     description:{
         type: String,
@@ -51,7 +46,7 @@ const roomSchema = new mongoose.Schema({
         enum: ["SINGLE", "DOUBLE", "QUEEN", "KING", "TWIN"]
     },
 
-    pricePerNight:{
+    price:{
         type: Number,
         required: true,
         min: 20000
@@ -70,7 +65,7 @@ const roomSchema = new mongoose.Schema({
 
     status:{
         type: String,
-        enum:["AVAILABLE", "OCCUPIED", "MAINTENANCE"],
+        enum:["AVAILABLE", "OCCUPIED"],
         default: "AVAILABLE"
     },
     images:{

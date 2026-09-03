@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import roomRouter from './routes/roomRoutes.js'
+import menuRouter from './routes/menuRoutes.js'
+import guestRouter from './routes/guestRoutes.js'
+import bookingRouter from './routes/bookingRoutes.js'
 
 dotenv.config();
 
@@ -23,10 +26,18 @@ connectDB();
 app.use(express.json());
 app.use(cors())
 
+//test route
 app.get('/', (req, res) => {
     res.send('server is running')
 });
-app.use("/api/rooms", roomRouter)
+
+//mount routers
+app.use("/api/bookings", bookingRouter);
+app.use("/api/guests", guestRouter);
+app.use("/api/rooms", roomRouter);
+app.use("/api/menu", menuRouter);
+
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

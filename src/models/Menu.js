@@ -25,9 +25,9 @@ const menuSchema = new mongoose.Schema({
         enum: ['AVAILABLE', 'UNAVAILABLE'],
         default: 'AVAILABLE'
     },
-    image:{
-        type: String
-    }
+
+    imageUrl:{ type: String },
+    image_id: { type: String }
 
 }, {timestamps: true});
 

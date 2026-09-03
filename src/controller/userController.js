@@ -1,12 +1,21 @@
 import User from "../models/User";
 import bcrypt from "bcryptjs";
 
+
+
 //REGISTER USER
 export const registerUser = async (req, res) => {
     const { fullname, email, password, role} = req.body
         if(!fullname || !email || !password || !role)
             return res.status(400).send({status: 'error', msg: 'required field must be filled'});
         try {
+            //check if email already exists
+            const existingUser = await User.findOne({ email });
+            if(existingUser){
+                return res.status(400).send({status: 'error', msg: 'Email already existed'});
+
+            }
+
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -14,9 +23,10 @@ export const registerUser = async (req, res) => {
                 fullname,
                 email,
                 password: hashedPassword,
-                role
+                role,
+                status: 'ACTIVE'
             });
-            return res.status(201).send({status: 'created', msg: 'successful created'});
+            return res.status(201).send({status: 'ok', msg: 'successful created'});
         } catch (error) {
             console.error(error)
             return res.status(500).send({status: 'error', msg: 'some error occurred'})
@@ -24,8 +34,8 @@ export const registerUser = async (req, res) => {
 
 };
 
-// FETCH ALL USER
-export const getUser = async (req, res) => {
+// FETCH ALL USERS
+export const getUsers = async (req, res) => {
     try {
         const users = await User.find().sort({createAt: -1});
         return res.status(200).send({status: 'ok', msg: 'success', data: users});
@@ -64,6 +74,10 @@ try {
 //DELETE USER BY ID
 export const deleteUser = async (req, res) => {
     try {
+        if(req.User.role !== req.params.id){
+            return res.status(403).send({status: 'error', msg: 'Access denied'});
+        }
+
         const user = await User.findByIdAndDelete(req.params.id);
         if(!user) {
             return res.status(404).send({status: 'error', msg: 'User not found'});
