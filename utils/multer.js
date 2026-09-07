@@ -1,22 +1,38 @@
-import multer from 'multer';
-import path from 'path';
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 
-// Uses the operating system's default temporary folder to store files
-export default multer({
-    storage: multer.diskStorage({}), //Take the file and put it in the computer's temporary storage folder for now.
-    fileFilter: (req, file, cb) => {
-        let ext = path.extname(file.originalname).toLowerCase();
-        
-        // List of allowed image extensions
-        const allowedExtensions = [
-            ".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"
-        ];
+const uploadPath = path.resolve("uploads/menu_images");
 
+// Ensure the folder exists
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
 
-        if (!allowedExtensions.includes(ext)) {
-            cb(new Error("File type is not supported"), false);
-            return;
-        }
-        cb(null, true);
-    }
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
 });
+
+const fileFilter = (req, file, cb) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif", ".jfif"];
+
+  if (!allowedExtensions.includes(ext)) {
+    return cb(new Error("File type is not supported"), false);
+  }
+  cb(null, true);
+};
+
+const uploader = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter
+});
+
+export default uploader;

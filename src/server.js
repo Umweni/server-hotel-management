@@ -2,10 +2,13 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import roomRouter from './routes/roomRoutes.js'
-import menuRouter from './routes/menuRoutes.js'
-import guestRouter from './routes/guestRoutes.js'
-import bookingRouter from './routes/bookingRoutes.js'
+import authRouter from './routes/authRoutes.js';
+import userRouter from './routes/userRoutes.js';
+import roomRouter from './routes/roomRoutes.js';
+import menuRouter from './routes/menuRoutes.js';
+import guestRouter from './routes/guestRoutes.js';
+import bookingRouter from './routes/bookingRoutes.js';
+import orderItemRouter from './routes/orderItemRoutes.js';
 
 dotenv.config();
 
@@ -32,11 +35,13 @@ app.get('/', (req, res) => {
 });
 
 //mount routers
+app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/guests", guestRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/menu", menuRouter);
-
+app.use("/api/order", orderItemRouter);
 
 
 const PORT = process.env.PORT || 5000;

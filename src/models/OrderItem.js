@@ -8,7 +8,8 @@ const  orderItemSchema = new mongoose.Schema({
     },
     quantity:{
         type: Number,
-        required: true
+        required: true,
+        min: 1
     },
     notes:{
         type: String
@@ -26,7 +27,7 @@ const orderSchema = new mongoose.Schema({
     customer:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Guest',
-        required: true
+        required: false
     },
     totalPrice:{
         type: Number,
@@ -40,8 +41,13 @@ const orderSchema = new mongoose.Schema({
     createdBy:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
-    }
+        required: false
+    },
+    booking: { type: mongoose.Schema.Types.ObjectId, 
+                ref: 'Booking'
+             },
+    roomNumber: { type: String }
+
 }, { timestamps: true });
 
 const Order = mongoose.model("Order", orderSchema);

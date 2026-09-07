@@ -6,10 +6,10 @@ const bookingSchema = new mongoose.Schema({
         ref: 'Room',
         required: true
     },
-    guest:{
+    guestId:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Guest',
-        required: true
+        required: false
     }, 
     checkInDate:{
         type: Date,
@@ -31,7 +31,7 @@ const bookingSchema = new mongoose.Schema({
     createdBy:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        
     }
 }, { timestamps: true });
 

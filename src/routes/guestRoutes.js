@@ -4,7 +4,7 @@ import { createGuest, getGuest, getGuestById, updateGuest, deleteGuest } from ".
 const router = express.Router();
 
 //create new guest
-router.post('/guest', createGuest); 
+router.post('/createGuest', createGuest); 
 
 //fetch all guests
 router.get('/guests', getGuest);

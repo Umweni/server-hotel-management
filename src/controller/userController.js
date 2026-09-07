@@ -1,4 +1,4 @@
-import User from "../models/User";
+import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 
 
@@ -37,7 +37,7 @@ export const registerUser = async (req, res) => {
 // FETCH ALL USERS
 export const getUsers = async (req, res) => {
     try {
-        const users = await User.find().sort({createAt: -1});
+        const users = await User.find().sort({createdAt: -1});
         return res.status(200).send({status: 'ok', msg: 'success', data: users});
     } catch (error) {
         console.log(error);
@@ -74,7 +74,7 @@ try {
 //DELETE USER BY ID
 export const deleteUser = async (req, res) => {
     try {
-        if(req.User.role !== req.params.id){
+        if(req.user.role !== req.params.id){
             return res.status(403).send({status: 'error', msg: 'Access denied'});
         }
 

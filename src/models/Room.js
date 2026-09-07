@@ -65,12 +65,10 @@ const roomSchema = new mongoose.Schema({
 
     status:{
         type: String,
-        enum:["AVAILABLE", "OCCUPIED"],
+        enum:["AVAILABLE", "OCCUPIED", "BOOKED"],
         default: "AVAILABLE"
     },
-    images:{
-        type: String
-    }
+    
 },{timestamps: true});
 
 const Room = mongoose.model("Room", roomSchema);

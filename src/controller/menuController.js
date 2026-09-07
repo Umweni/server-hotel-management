@@ -1,65 +1,90 @@
-import Menu from "../models/Menu";
-import cloudinary from "../../utils/cloudinary";
+import Menu from '../models/Menu.js'; 
+import cloudinary from "../../utils/cloudinary.js";
+import fs from "fs"; // to remove local file after upload to cloudinary
 
+// Helper function to remove local file
+const removeLocalFile = (path) => {
+    fs.unlink(path, (err) => { if(err) console.log(err) });
+}
 
-//create new menu
+// CREATE
 export const createMenu = async (req, res) => {
-    try {
-        const { name, description, price, category } = req.body;
-        if(!name || !price || !category || !description){
-            return res.status(400).send({status: 'error', msg: 'required field must be filled'});
-        }
-
-        let imageData = {};
-        if(req.file) {
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: "menu_images",
-            });
-                    //assign the image url and public id to the imageData object
-                imageData = {
-                    imageUrl: result.secure_url,
-                    image_id: result.public_id
-                };
-            }
-
-        const menu = new Menu({ ...req.body, ...imageData });
-        await menu.save();
-        res.status(201).send({status: 'ok', msg: 'Menu created successfully', data: menu});
-    } catch (error) {
-        res.status(400).send({status: 'error', msg: error.message});
+  try {
+    const { name, description, price, category } = req.body;
+    if (!name || !price || !category || !description) {
+      return res.status(400).json({ status: 'error', msg: 'All fields are required' });
     }
+
+    let imageData = {};
+    if (req.file) {
+      try {
+        const result = await cloudinary.uploader.upload(req.file.path, { folder: "menu_images" });
+        imageData = {
+          imageUrl: result.secure_url,
+          image_id: result.public_id
+        };
+        removeLocalFile(req.file.path);
+      } catch (err) {
+        console.error("Cloudinary error:", err);
+        return res.status(500).json({ status: 'error', msg: 'Image upload failed' });
+      }
+    }
+
+    const newMenu = new Menu({
+      name,
+      description,
+      price,
+      category,
+      ...imageData
+    });
+
+    await newMenu.save();
+    res.status(201).json({ status: 'success', data: newMenu });
+
+  } catch (err) {
+    console.error("Server error:", err);
+    res.status(500).json({ status: 'error', msg: 'Internal server error' });
+  }
 };
 
-//fetch all menu
+
+// GET ALL with filter + search
 export const getMenu = async (req, res) => {
     try {   
-        const menus = await Menu.find();
-        res.status(200).send({status: 'ok', msg: 'Menus fetched successfully', data: menus});
+        const { category, search } = req.query;
+        let query = {};
+        if(category) query.category = category;
+        if(search) query.name = { $regex: search, $options: 'i' };
+
+        const menus = await Menu.find(query).sort({ createdAt: -1 });
+        res.status(200).json({status: 'ok', count: menus.length, data: menus});
     } catch (error) {
-        res.status(400).send({status: 'error', msg: error.message});
+        res.status(500).json({status: 'error', msg: error.message});
     }
 };
 
-//fetch single menu by id
+// GET BY ID
 export const getMenuById = async (req, res) => {
     try {       
         const menu = await Menu.findById(req.params.id);
         if (!menu) {
-            return res.status(404).send({status: 'error', msg: 'Menu not found'});
+            return res.status(404).json({status: 'error', msg: 'Menu not found'});
         }
-        res.status(200).send({status: 'ok', msg: 'Menu fetched successfully', data: menu});
+        res.status(200).json({status: 'ok', data: menu});
     } catch (error) {
-        res.status(400).send({status: 'error', msg: error.message});
+        res.status(500).json({status: 'error', msg: error.message});
     }
 };  
 
-//update menu by id and handle image upload
+// UPDATE
 export const updateMenu = async (req, res) => {
     try {
         let imageData = {};
         if(req.file) {
             const oldMenu = await Menu.findById(req.params.id);
-            if(oldMenu && oldMenu.image_id) {
+            if(!oldMenu) return res.status(404).json({status: 'error', msg: 'Menu not found'});
+
+            if(oldMenu.image_id) {
                 await cloudinary.uploader.destroy(oldMenu.image_id);
             }
             const result = await cloudinary.uploader.upload(req.file.path, {
@@ -69,33 +94,38 @@ export const updateMenu = async (req, res) => {
                 imageUrl: result.secure_url,
                 image_id: result.public_id
             };
+            removeLocalFile(req.file.path);
         }
 
-        const menu = await Menu.findByIdAndUpdate(req.params.id, { ...req.body, ...imageData }, { new: true, runValidators: true });
+        const menu = await Menu.findByIdAndUpdate(
+            req.params.id, 
+            { ...req.body, ...imageData }, 
+            { new: true, runValidators: true }
+        );
         if (!menu) {
-            return res.status(404).send({status: 'error', msg: 'Menu not found'});
+            return res.status(404).json({status: 'error', msg: 'Menu not found'});
         }
-        res.status(200).send({status: 'ok', msg: 'Menu updated successfully', data: menu});
+        res.status(200).json({status: 'ok', msg: 'Menu updated successfully', data: menu});
     } catch (error) {
-        res.status(400).send({status: 'error', msg: error.message});
+        if(req.file) removeLocalFile(req.file.path);
+        res.status(500).json({status: 'error', msg: error.message});
     }
 };
 
-//delete menu by id and remove image from cloudinary
+// DELETE
 export const deleteMenu = async (req, res) => {
     try {
-        const menu = await Menu.findByIdAndDelete(req.params.id);
+        const menu = await Menu.findById(req.params.id);
         if (!menu) {
-            return res.status(404).send({status: 'error', msg: 'Menu not found'});
+            return res.status(404).json({status: 'error', msg: 'Menu not found'});
         }
 
         if(menu.image_id) {
             await cloudinary.uploader.destroy(menu.image_id);
         }
         await menu.deleteOne();
-        res.status(200).send({status: 'ok', msg: 'Menu deleted successfully', data: menu});
+        res.status(200).json({status: 'ok', msg: 'Menu deleted successfully', data: menu});
     } catch (error) {
-        res.status(400).send({status: 'error', msg: error.message});
+        res.status(500).json({status: 'error', msg: error.message});
     }
 };
-

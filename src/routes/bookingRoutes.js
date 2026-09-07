@@ -1,18 +1,23 @@
 import express from "express";
-import { createBooking, checkRoomAvailability, upgradeBooking, cancelBooking } from "../controller/bookingController";
+import {
+  createBooking,
+  checkRoomAvailability,
+  upgradeBooking,
+  cancelBooking
+} from "../controller/bookingController.js";
 
 const router = express.Router();
 
-//create new booking
-router.post('/booking', createBooking);
+// create new booking
+router.post("/createBooking", createBooking);
 
-//check room availability
-router.post('/booking/availability', checkRoomAvailability);
+// check room availability
+router.post("/availability", checkRoomAvailability);
 
-//upgrade booking by id
-router.put('/booking/:id', upgradeBooking);
+// upgrade booking by id
+router.put("/:id", upgradeBooking);
 
-//cancel booking by id
-router.delete('/booking/:id', cancelBooking);
+// cancel booking by id
+router.delete("/:id", cancelBooking);
 
 export default router;
