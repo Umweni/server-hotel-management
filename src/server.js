@@ -8,7 +8,7 @@ import roomRouter from './routes/roomRoutes.js';
 import menuRouter from './routes/menuRoutes.js';
 import guestRouter from './routes/guestRoutes.js';
 import bookingRouter from './routes/bookingRoutes.js';
-import orderItemRouter from './routes/orderItemRoutes.js';
+import orderRouter from './routes/orderRoutes.js';
 
 dotenv.config();
 
@@ -41,7 +41,7 @@ app.use("/api/bookings", bookingRouter);
 app.use("/api/guests", guestRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/menu", menuRouter);
-app.use("/api/order", orderItemRouter);
+app.use("/api/order", orderRouter);
 
 
 const PORT = process.env.PORT || 5000;

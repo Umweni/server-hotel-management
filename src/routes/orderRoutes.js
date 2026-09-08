@@ -1,16 +1,15 @@
 import express from 'express';
-import { createOrder, getAllOrders, getOrderById, updateOrder, updateOrderStatus, deleteOrder } from '../controller/orderItemController.js';
+import { createOrder, getOrders, getOrderById,  updateOrderStatus, deleteOrder } from '../controller/orderController.js';
 
 const router = express.Router();
 
 //create a new order
 router.post('/createOrder', createOrder);
 //get all orders
-router.get('/getAllOrders', getAllOrders);
+router.get('/getOrders', getOrders);
 //get a single order
 router.get('/:id', getOrderById);
-//update an order
-router.put('/:id', updateOrder);
+
 //update order status
 router.patch('/:id/status', updateOrderStatus);
 //delete an order
