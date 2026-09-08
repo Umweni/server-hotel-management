@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import authRouter from './routes/authRoutes.js';
-import userRouter from './routes/userRoutes.js';
 import roomRouter from './routes/roomRoutes.js';
 import menuRouter from './routes/menuRoutes.js';
 import guestRouter from './routes/guestRoutes.js';
@@ -36,7 +35,6 @@ app.get('/', (req, res) => {
 
 //mount routers
 app.use("/api/auth", authRouter);
-app.use("/api/users", userRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/guests", guestRouter);
 app.use("/api/rooms", roomRouter);

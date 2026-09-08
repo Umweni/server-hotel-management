@@ -5,7 +5,7 @@ export const createGuest = async (req, res) => {
   try {
     const { name, email, phone, address } = req.body;
 
-    if (!name || !email || !phone) {
+    if (!firstname || !lastname || !email || !phone) {
       return res.status(400).send({ status: 'error', msg: 'Name, email, and phone are required' });
     }
 
