@@ -1,5 +1,5 @@
 import Menu from '../models/Menu.js'; 
-import cloudinary from "../../utils/cloudinary.js";
+import cloudinary from '../utils/cloudinary.js'
 import fs from "fs"; // to remove local file after upload to cloudinary
 
 // Helper function to remove local file

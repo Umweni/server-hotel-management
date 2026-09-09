@@ -8,13 +8,16 @@ const roomSchema = new mongoose.Schema({
         trim: true
     },
 
-
+    // roomType: {
+    //     type: String,
+    //     required: true,
+    // },
     description:{
         type: String,
         trim: true
     },
 
-    category:{
+    roomType:{
         type: String,
         required: true,
         enum:[
@@ -58,7 +61,7 @@ const roomSchema = new mongoose.Schema({
     },
     size:{
         type: Number
-    },   // This list of lodging types is perhaps the simplest of all. If someone asks “what are three
+     },   // This list of lodging types is perhaps the simplest of all. If someone asks “what are three
          // different types of hotel properties?” you can say small (<25 rooms), medium 
         // (26-300 rooms) and large (>300 rooms).
 
@@ -68,7 +71,10 @@ const roomSchema = new mongoose.Schema({
         enum:["AVAILABLE", "OCCUPIED", "BOOKED"],
         default: "AVAILABLE"
     },
-    
+    // available: {
+    //     //type: Boolean,
+    //     default: true,
+    // }
 },{timestamps: true});
 
 const Room = mongoose.model("Room", roomSchema);

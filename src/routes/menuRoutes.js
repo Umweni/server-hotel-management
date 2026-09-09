@@ -1,5 +1,5 @@
 import express from "express";
-import uploader from "../../utils/multer.js";
+import uploader from "../utils/multer.js"
 import { createMenu, getMenu, getMenuById, updateMenu, deleteMenu } from "../controller/menuController.js";
 
 const router = express.Router();

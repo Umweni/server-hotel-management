@@ -5,23 +5,32 @@ export const createGuest = async (req, res) => {
   try {
     const { name, email, phone, address } = req.body;
 
-    if (!firstname || !lastname || !email || !phone) {
-      return res.status(400).send({ status: 'error', msg: 'Name, email, and phone are required' });
+    if (!name || !email || !phone) {
+      return res.status(400).json({ success: false, message: "Name, email, and phone are required" });
     }
 
     const existingGuest = await Guest.findOne({ email });
     if (existingGuest) {
-      return res.status(400).send({ status: 'error', msg: 'Guest with this email already exists' });
+      return res.status(409).json({ success: false, message: "Guest with this email already exists" });
     }
 
-    const guest = new Guest({ name, email, phone, address });
-    await guest.save();
+    const guest = await Guest.create({ name, email, phone, address });
 
-    res.status(201).send({ status: 'ok', msg: 'Guest created successfully', data: guest });
+    return res.status(201).json({
+      success: true,
+      message: "Guest created successfully",
+      guest: {
+        id: guest._id,
+        name: guest.name,
+        email: guest.email,
+      },
+    });
   } catch (error) {
-    res.status(500).send({ status: 'error', msg: error.message });
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // Fetch all guests
 export const getGuest = async (req, res) => {

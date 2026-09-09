@@ -1,11 +1,7 @@
 import mongoose from "mongoose";
 
 const guestSchema = new mongoose.Schema({
-    firstname: {
-        type: String,
-        required: true
-    },
-    lastname: {
+    name: {
         type: String,
         required: true
     },

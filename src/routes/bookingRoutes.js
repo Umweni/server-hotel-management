@@ -18,6 +18,6 @@ router.post("/availability", checkRoomAvailability);
 router.put("/:id", upgradeBooking);
 
 // cancel booking by id
-router.delete("/:id", cancelBooking);
+router.delete("/cancelBooking/:id", cancelBooking);
 
 export default router;

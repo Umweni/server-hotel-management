@@ -14,9 +14,9 @@ export const getRoom = async (req, res) => {
 // Create room
 export const createRoom = async (req, res) => {
   try {
-    const { roomNumber, price, category, capacity, bedType, floor } = req.body;
+    const { roomNumber, price, roomType, capacity, bedType, floor } = req.body;
 
-    if (!roomNumber || !price || !category || !capacity || !bedType || !floor) {
+    if (!roomNumber || !price || !roomType || !capacity || !bedType || !floor) {
       return res.status(400).send({ status: 'error', msg: 'Fill required fields' });
     }
 

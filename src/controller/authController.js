@@ -12,10 +12,15 @@ export const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
+    
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: "Name, email, and password are required" });
+    }
+
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ success: false, message: "User already exists" });
     }
 
     // Hash password
@@ -31,49 +36,67 @@ export const registerUser = async (req, res) => {
     });
 
     if (user) {
-      res.status(201).send({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+      return res.status(201).json({
+        success: true,
+        message: "User registered successfully",
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
         token: generateToken(user._id),
       });
     } else {
-      res.status(400).send({ message: "Invalid user data" });
+      return res.status(400).json({ success: false, message: "Invalid user data" });
     }
   } catch (error) {
-    res.status(500).send({ message: error.message });
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // LOGIN USER
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Email and password are required" });
+    }
+
     // Find user
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).send({ message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).send({ message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
     // Return user data + token
-    res.send({
-      _id: user.id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user.id),
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      token: generateToken(user._id),
     });
   } catch (error) {
-    res.status(500).send({ message: error.message });
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Login failed" });
   }
 };
+
 
 // GET USER PROFILE
 export const getUserProfile = async (req, res) => {

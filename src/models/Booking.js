@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
 const bookingSchema = new mongoose.Schema({
-    roomId:{
+    room:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Room',
         required: true
     },
-    guestId:{
+    guest:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Guest',
         required: false
@@ -19,14 +19,14 @@ const bookingSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    totalPrice:{
+    totalAmount:{
         type: Number,
         required: true
     },
     status:{
         type: String,
         enum: ['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED'],
-        default: 'PENDING'
+        default: 'CONFIRMED'
     },
     createdBy:{
         type: mongoose.Schema.Types.ObjectId,
