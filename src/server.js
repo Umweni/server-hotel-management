@@ -8,6 +8,7 @@ import menuRouter from './routes/menuRoutes.js';
 import guestRouter from './routes/guestRoutes.js';
 import bookingRouter from './routes/bookingRoutes.js';
 import orderRouter from './routes/orderRoutes.js';
+import paymentRouter from './routes/paymentRoutes.js';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.get('/', (req, res) => {
 //mount routers
 app.use("/api/auth", authRouter);
 app.use("/api/bookings", bookingRouter);
+////app.use("/api/payment", paymentRouter);
 app.use("/api/guests", guestRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/menu", menuRouter);

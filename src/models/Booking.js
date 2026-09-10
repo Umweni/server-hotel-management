@@ -32,7 +32,10 @@ const bookingSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         
-    }
+    },
+    paymentStatus: { type: String, enum: ["pending", "paid", "failed"], default: "pending" },
+    paymentReference: { type: String },
+
 }, { timestamps: true });
 
 const Booking = mongoose.model("Booking", bookingSchema);

@@ -6,7 +6,7 @@ import { sendBookingCancellation } from "../utils/sendEmail.js";
 
 export const createBooking = async (req, res) => {
   try {
-    const { roomId, guestId, checkInDate, checkOutDate } = req.body;
+    const { roomId, guestId, checkInDate, checkOutDate,  } = req.body;
 
     // Find guest
     const guest = await Guest.findById(guestId);
