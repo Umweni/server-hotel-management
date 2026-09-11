@@ -11,13 +11,13 @@ export const createBooking = async (req, res) => {
     // Find guest
     const guest = await Guest.findById(guestId);
     if (!guest) {
-      return res.status(404).json({ success: false, message: "Guest not found" });
+      return res.status(404).send({ success: false, message: "Guest not found" });
     }
 
     // Validate room exists
     const room = await Room.findById(roomId);
     if (!room) {
-      return res.status(404).json({ success: false, message: "Room not found" });
+      return res.status(404).send({ success: false, message: "Room not found" });
     }
 
     // Convert dates
@@ -26,10 +26,10 @@ export const createBooking = async (req, res) => {
 
     // Validate dates
     if (checkOut <= checkIn) {
-      return res.status(400).json({ success: false, message: "Check-out must be after check-in" });
+      return res.status(400).send({ success: false, message: "Check-out must be after check-in" });
     }
     if (checkIn < new Date()) {
-      return res.status(400).json({ success: false, message: "Check-in date cannot be in the past" });
+      return res.status(400).send({ success: false, message: "Check-in date cannot be in the past" });
     }
 
     // Check overlapping bookings
@@ -39,7 +39,7 @@ export const createBooking = async (req, res) => {
       checkOutDate: { $gt: checkIn },
     });
     if (overlappingBooking) {
-      return res.status(400).json({ success: false, message: "Room is not available for these dates" });
+      return res.status(400).send({ success: false, message: "Room is not available for these dates" });
     }
 
     // Calculate nights and price
@@ -78,7 +78,7 @@ export const createBooking = async (req, res) => {
       console.error("Email failed:", emailError.message);
     }
 
-    return res.status(201).json({
+    return res.status(201).send({
       success: true,
       message: "Room booked successfully. Confirmation email sent.",
       booking: {
@@ -93,7 +93,7 @@ export const createBooking = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: "Failed to create booking" });
+    return res.status(500).send({ success: false, message: "Failed to create booking" });
   }
 };
 
@@ -144,11 +144,11 @@ export const cancelBooking = async (req, res) => {
       .populate("guest");
 
     if (!booking) {
-      return res.status(404).json({ success: false, message: "Booking not found" });
+      return res.status(404).send({ success: false, message: "Booking not found" });
     }
 
     if (booking.status === "CANCELLED") {
-      return res.json({ success: true, message: "Booking already cancelled", booking });
+      return res.send({ success: true, message: "Booking already cancelled", booking });
     }
 
     booking.status = "CANCELLED";
@@ -175,7 +175,7 @@ export const cancelBooking = async (req, res) => {
       console.error("Cancellation email failed:", emailError.message);
     }
 
-    return res.json({
+    return res.send({
       success: true,
       message: "Booking cancelled successfully. Room is now available.",
       booking,
@@ -183,7 +183,7 @@ export const cancelBooking = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({
+    return res.status(500).send({
       success: false,
       message: "Failed to cancel booking",
       error: error.message,

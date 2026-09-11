@@ -12,7 +12,7 @@ export const createMenu = async (req, res) => {
   try {
     const { name, description, price, category } = req.body;
     if (!name || !price || !category || !description) {
-      return res.status(400).json({ status: 'error', msg: 'All fields are required' });
+      return res.status(400).send({ status: 'error', msg: 'All fields are required' });
     }
 
     let imageData = {};
@@ -26,7 +26,7 @@ export const createMenu = async (req, res) => {
         removeLocalFile(req.file.path);
       } catch (err) {
         console.error("Cloudinary error:", err);
-        return res.status(500).json({ status: 'error', msg: 'Image upload failed' });
+        return res.status(500).send({ status: 'error', msg: 'Image upload failed' });
       }
     }
 
@@ -39,11 +39,11 @@ export const createMenu = async (req, res) => {
     });
 
     await newMenu.save();
-    res.status(201).json({ status: 'success', data: newMenu });
+    res.status(201).send({ status: 'success', data: newMenu });
 
   } catch (err) {
     console.error("Server error:", err);
-    res.status(500).json({ status: 'error', msg: 'Internal server error' });
+    res.status(500).send({ status: 'error', msg: 'Internal server error' });
   }
 };
 
@@ -57,9 +57,9 @@ export const getMenu = async (req, res) => {
         if(search) query.name = { $regex: search, $options: 'i' };
 
         const menus = await Menu.find(query).sort({ createdAt: -1 });
-        res.status(200).json({status: 'ok', count: menus.length, data: menus});
+        res.status(200).send({status: 'ok', count: menus.length, data: menus});
     } catch (error) {
-        res.status(500).json({status: 'error', msg: error.message});
+        res.status(500).send({status: 'error', msg: error.message});
     }
 };
 
@@ -68,11 +68,11 @@ export const getMenuById = async (req, res) => {
     try {       
         const menu = await Menu.findById(req.params.id);
         if (!menu) {
-            return res.status(404).json({status: 'error', msg: 'Menu not found'});
+            return res.status(404).send({status: 'error', msg: 'Menu not found'});
         }
-        res.status(200).json({status: 'ok', data: menu});
+        res.status(200).send({status: 'ok', data: menu});
     } catch (error) {
-        res.status(500).json({status: 'error', msg: error.message});
+        res.status(500).send({status: 'error', msg: error.message});
     }
 };  
 
@@ -82,7 +82,7 @@ export const updateMenu = async (req, res) => {
         let imageData = {};
         if(req.file) {
             const oldMenu = await Menu.findById(req.params.id);
-            if(!oldMenu) return res.status(404).json({status: 'error', msg: 'Menu not found'});
+            if(!oldMenu) return res.status(404).send({status: 'error', msg: 'Menu not found'});
 
             if(oldMenu.image_id) {
                 await cloudinary.uploader.destroy(oldMenu.image_id);
@@ -103,12 +103,12 @@ export const updateMenu = async (req, res) => {
             { new: true, runValidators: true }
         );
         if (!menu) {
-            return res.status(404).json({status: 'error', msg: 'Menu not found'});
+            return res.status(404).send({status: 'error', msg: 'Menu not found'});
         }
-        res.status(200).json({status: 'ok', msg: 'Menu updated successfully', data: menu});
+        res.status(200).send({status: 'ok', msg: 'Menu updated successfully', data: menu});
     } catch (error) {
         if(req.file) removeLocalFile(req.file.path);
-        res.status(500).json({status: 'error', msg: error.message});
+        res.status(500).send({status: 'error', msg: error.message});
     }
 };
 
@@ -117,15 +117,15 @@ export const deleteMenu = async (req, res) => {
     try {
         const menu = await Menu.findById(req.params.id);
         if (!menu) {
-            return res.status(404).json({status: 'error', msg: 'Menu not found'});
+            return res.status(404).send({status: 'error', msg: 'Menu not found'});
         }
 
         if(menu.image_id) {
             await cloudinary.uploader.destroy(menu.image_id);
         }
         await menu.deleteOne();
-        res.status(200).json({status: 'ok', msg: 'Menu deleted successfully', data: menu});
+        res.status(200).send({status: 'ok', msg: 'Menu deleted successfully', data: menu});
     } catch (error) {
-        res.status(500).json({status: 'error', msg: error.message});
+        res.status(500).send({status: 'error', msg: error.message});
     }
 };

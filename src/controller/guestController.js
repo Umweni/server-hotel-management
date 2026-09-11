@@ -6,17 +6,17 @@ export const createGuest = async (req, res) => {
     const { name, email, phone, address } = req.body;
 
     if (!name || !email || !phone) {
-      return res.status(400).json({ success: false, message: "Name, email, and phone are required" });
+      return res.status(400).send({ success: false, message: "Name, email, and phone are required" });
     }
 
     const existingGuest = await Guest.findOne({ email });
     if (existingGuest) {
-      return res.status(409).json({ success: false, message: "Guest with this email already exists" });
+      return res.status(409).send({ success: false, message: "Guest with this email already exists" });
     }
 
     const guest = await Guest.create({ name, email, phone, address });
 
-    return res.status(201).json({
+    return res.status(201).send({
       success: true,
       message: "Guest created successfully",
       guest: {
@@ -27,7 +27,7 @@ export const createGuest = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).send({ success: false, message: error.message });
   }
 };
 

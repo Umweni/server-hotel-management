@@ -22,9 +22,9 @@ export const createOrder = async (req, res) => {
     });
 
     await order.save();
-    res.status(201).send({ status: 'ok', msg: 'successfully created', order });
+    return res.status(201).send({ status: 'ok', msg: 'successfully created', order });
   } catch (error) {
-    res.status(400).send({ status: 'error', msg: error.message });
+    return res.status(400).send({ status: 'error', msg: error.message });
   }
 };
 
@@ -38,7 +38,7 @@ export const getOrders = async (req, res) => {
             .populate("menuId", "title price");
         res.json(orders);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(500).send({ message: error.message });
     }
 };
 
@@ -49,10 +49,10 @@ export const getOrderById = async (req, res) => {
             .populate("guestId", "name email")
             .populate("menuId", "title price");
 
-        if (!order) return res.status(404).json({ message: "Order not found" });
-        res.json(order);
+        if (!order) return res.status(404).send({ message: "Order not found" });
+        res.send(order);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(500).send({ message: error.message });
     }
 };
 
@@ -66,10 +66,10 @@ export const updateOrderStatus = async (req, res) => {
             { new: true }
         );
 
-        if (!order) return res.status(404).json({ message: "Order not found" });
-        res.json(order);
+        if (!order) return res.status(404).send({ message: "Order not found" });
+        res.send(order);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).send({ message: error.message });
     }
 };
 
@@ -77,9 +77,9 @@ export const updateOrderStatus = async (req, res) => {
 export const deleteOrder = async (req, res) => {
     try {
         const order = await Order.findByIdAndDelete(req.params.id);
-        if (!order) return res.status(404).json({ message: "Order not found" });
-        res.json({ message: "Order deleted successfully" });
+        if (!order) return res.status(404).send({ message: "Order not found" });
+        return res.send({ message: "Order deleted successfully" });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(500).send({ message: error.message });
     }
 };

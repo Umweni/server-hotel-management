@@ -11,26 +11,26 @@ export const initializePayment = async (req, res) => {
     // Find booking
     const booking = await Booking.findById(bookingId);
     if (!booking) {
-      return res.status(404).json({ success: false, message: "Booking not found" });
+      return res.status(404).send({ success: false, message: "Booking not found" });
     }
 
     // Role-based access
     if (req.user.role !== "STAFF") {
       // Guests can only pay for their own bookings
       if (!booking.guest || booking.guest.toString() !== req.user.id.toString()) {
-        return res.status(403).json({ success: false, message: "Not your booking" });
+        return res.status(403).send({ success: false, message: "Not your booking" });
       }
     }
 
     // Prevent double payment
     if (booking.paymentStatus === "paid") {
-      return res.status(400).json({ success: false, message: "Booking already paid" });
+      return res.status(400).send({ success: false, message: "Booking already paid" });
     }
 
     // Get guest details from booking
     const guest = await Guest.findById(booking.guest);
     if (!guest) {
-      return res.status(404).json({ success: false, message: "Guest not found" });
+      return res.status(404).send({ success: false, message: "Guest not found" });
     }
 
     // Prepare Paystack request
@@ -59,7 +59,7 @@ export const initializePayment = async (req, res) => {
     booking.paymentReference = reference;
     await booking.save();
 
-    return res.json({
+    return res.send({
       success: true,
       message: "Payment initialized",
       authorizationUrl: response.data.data.authorization_url,
@@ -69,7 +69,7 @@ export const initializePayment = async (req, res) => {
   } catch (error) {
     console.error("Paystack error:", error.response?.data || error);
     console.error("General error:", error.message);
-    return res.status(500).json({ success: false, message: "Payment initialization failed" });
+    return res.status(500).send({ success: false, message: "Payment initialization failed" });
   }
 };
 
@@ -88,14 +88,14 @@ export const verifyPayment = async (req, res) => {
     // Find payment record in DB
     const paymentDoc = await Payment.findOne({ reference }).populate("booking");
     if (!paymentDoc) {
-      return res.status(404).json({ success: false, message: "Payment record not found" });
+      return res.status(404).send({ success: false, message: "Payment record not found" });
     }
 
     // Handle failed payment
     if (payment.status !== "success") {
       paymentDoc.status = "failed";
       await paymentDoc.save();
-      return res.status(400).json({ success: false, message: "Payment failed" });
+      return res.status(400).send({ success: false, message: "Payment failed" });
     }
 
     // Load booking linked to payment
@@ -104,18 +104,18 @@ export const verifyPayment = async (req, res) => {
       .populate("room");
 
     if (!booking) {
-      return res.status(404).json({ success: false, message: "Booking not found" });
+      return res.status(404).send({ success: false, message: "Booking not found" });
     }
 
     // Prevent duplicate verification
     if (booking.paymentStatus === "paid") {
-      return res.json({ success: true, message: "Payment already verified", booking });
+      return res.send({ success: true, message: "Payment already verified", booking });
     }
 
     // Validate amount
     const expectedAmount = Math.round(booking.totalAmount * 100);
     if (payment.amount !== expectedAmount) {
-      return res.status(400).json({ success: false, message: "Payment amount does not match booking amount" });
+      return res.status(400).send({ success: false, message: "Payment amount does not match booking amount" });
     }
 
     // Update Payment record
@@ -145,11 +145,11 @@ export const verifyPayment = async (req, res) => {
       console.error("Email failed:", emailError.message);
     }
 
-    return res.json({ success: true, message: "Payment successful. Booking confirmed.", booking });
+    return res.send({ success: true, message: "Payment successful. Booking confirmed.", booking });
 
   } catch (error) {
     console.error("Paystack error:", error.response?.data);
     console.error("General error:", error.message);
-    return res.status(500).json({ success: false, message: "Payment verification failed" });
+    return res.status(500).send({ success: false, message: "Payment verification failed" });
   }
 };
