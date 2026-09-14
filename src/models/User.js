@@ -16,16 +16,20 @@ const userSchema = new mongoose.Schema({
 
     password:{
         type: String,
-        required: true,
+        required: false,
         trim: true,
         minlength: 6,
         select: false
     },
+    guest:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Guest"
+    },
 
    role:{
     type: String,
-    enum:['ADMIN', 'MANAGER', 'RECEPTIONIST', 'CHEF', 'WAITER', 'HOUSEKEEPING'],
-    default: 'RECEPTIONIST'
+    enum:["STAFF", "GUEST"],
+    required: true
    },
 
    status:{

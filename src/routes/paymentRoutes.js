@@ -1,12 +1,11 @@
 import express from "express";
-import { initializePayment, verifyPayment } from "../controller/paymentController.js";
+import validate_user from "../middleware/authMiddleware.js";
+import { initializePayment, verifyPayment,  } from "../controller/paymentController.js";
 
 const router = express.Router();
 
-// Initialize payment for a booking
-router.post("/payments/initialize", initializePayment);
-
-// Verify payment after Paystack callback
-router.get("/payments/verify/:reference", verifyPayment);
+router.post("/initialize", validate_user, initializePayment);
+router.get("/verify/:reference", validate_user, verifyPayment);
+// router.post("/webhook", paystackWebhook); // webhook usually doesn’t need auth
 
 export default router;

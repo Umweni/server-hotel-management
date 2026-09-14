@@ -1,7 +1,8 @@
-import Guest from '../models/Guest.js';
+import jwt from "jsonwebtoken";
+import Guest from "../models/Guest.js";
+import User from "../models/User.js";
 
-// Create new guest
-export const createGuest = async (req, res) => {
+export const guestSignup = async (req, res) => {
   try {
     const { name, email, phone, address } = req.body;
 
@@ -9,25 +10,36 @@ export const createGuest = async (req, res) => {
       return res.status(400).send({ success: false, message: "Name, email, and phone are required" });
     }
 
-    const existingGuest = await Guest.findOne({ email });
-    if (existingGuest) {
-      return res.status(409).send({ success: false, message: "Guest with this email already exists" });
+    // check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).send({ success: false, message: "User already exists" });
     }
 
+    // create guest profile
     const guest = await Guest.create({ name, email, phone, address });
 
-    return res.status(201).send({
+    // create linked user
+    const user = await User.create({
+      fullname: name,
+      email,
+      role: "GUEST",
+      status: "ACTIVE",
+      guest: guest._id
+    });
+
+    // issue JWT
+    const token = jwt.sign({ id: user._id, role: user.role, guestId: guest._id}, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    res.status(201).send({
       success: true,
-      message: "Guest created successfully",
-      guest: {
-        id: guest._id,
-        name: guest.name,
-        email: guest.email,
-      },
+      message: "Guest registered successfully",
+      token,
+      user: { id: user._id, fullname: user.fullname, role: user.role },
+      guest: { id: guest._id, name: guest.name, email: guest.email}
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).send({ success: false, message: error.message });
+    res.status(500).send({ success: false, message: error.message });
   }
 };
 
@@ -41,6 +53,36 @@ export const getGuest = async (req, res) => {
     res.status(500).send({ status: 'error', msg: error.message });
   }
 };
+
+
+export const guestLogin = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email, role: "GUEST" }).populate("guest");
+
+    if (!user) {
+      return res.status(404).send({ success: false, message: "Guest not found" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role, guestId: user.guest._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.send({
+      success: true,
+      message: "Login successful",
+      token,
+      user: { id: user._id, fullname: user.fullname, role: user.role },
+      guest: { id: user.guest._id, name: user.guest.name, email: user.guest.email }
+    });
+  } catch (error) {
+    res.status(500).send({ success: false, message: error.message });
+  }
+};
+
+
 
 // Fetch single guest by ID
 export const getGuestById = async (req, res) => {
