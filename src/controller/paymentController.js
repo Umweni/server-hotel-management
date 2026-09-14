@@ -156,67 +156,67 @@ export const verifyPayment = async (req, res) => {
 };
 
 
-// export const paystackWebhook = async (req, res) => {
-//   try {
-//     const signature = req.headers["x-paystack-signature"];
-//     if (!signature) return res.sendStatus(400);
+export const paystackWebhook = async (req, res) => {
+  try {
+    const signature = req.headers["x-paystack-signature"];
+    if (!signature) return res.sendStatus(400);
 
-//     const hash = crypto
-//       .createHmac("sha512", process.env.PAYSTACK_SECRET_KEY)
-//       .update(req.rawBody)
-//       .digest("hex");
+    const hash = crypto
+      .createHmac("sha512", process.env.PAYSTACK_SECRET_KEY)
+      .update(req.rawBody)
+      .digest("hex");
 
-//     if (hash !== signature) return res.sendStatus(400);
+    if (hash !== signature) return res.sendStatus(400);
 
-//     const event = req.body;
+    const event = req.body;
 
-//     if (event.event === "charge.success") {
-//       const { reference } = event.data;
+    if (event.event === "charge.success") {
+      const { reference } = event.data;
 
-//       // Verify transaction with Paystack helper
-//       const response = await verifyTransaction(reference);
-//       if (!response.status) {
-//         return res.sendStatus(400);
-//       }
+      // Verify transaction with Paystack helper
+      const response = await verifyTransaction(reference);
+      if (!response.status) {
+        return res.sendStatus(400);
+      }
 
-//       const payment = await Payment.findOne({ reference }).populate("booking");
+      const payment = await Payment.findOne({ reference }).populate("booking");
 
-//       if (payment && payment.status !== "success") {
-//         payment.status = "success";
-//         await payment.save();
+      if (payment && payment.status !== "success") {
+        payment.status = "success";
+        await payment.save();
 
-//         const booking = await Booking.findById(payment.booking._id)
-//           .populate("guest")
-//           .populate("room");
+        const booking = await Booking.findById(payment.booking._id)
+          .populate("guest")
+          .populate("room");
 
-//         if (booking) {
-//           booking.paymentStatus = "paid";
-//           booking.status = "CONFIRMED";
-//           booking.paymentReference = reference;
-//           await booking.save();
+        if (booking) {
+          booking.paymentStatus = "paid";
+          booking.status = "CONFIRMED";
+          booking.paymentReference = reference;
+          await booking.save();
 
-//           try {
-//             await sendBookingConfirmation({
-//               guestName: booking.guest.name,
-//               guestEmail: booking.guest.email,
-//               bookingId: booking._id,
-//               roomNumber: booking.room.roomNumber,
-//               roomType: booking.room.roomType,
-//               checkIn: booking.checkInDate,
-//               checkOut: booking.checkOutDate,
-//               totalAmount: booking.totalAmount,
-//             });
-//             console.log("Confirmation email sent via webhook");
-//           } catch (emailError) {
-//             console.error("Email failed:", emailError.message);
-//           }
-//         }
-//       }
-//     }
+          try {
+            await sendBookingConfirmation({
+              guestName: booking.guest.name,
+              guestEmail: booking.guest.email,
+              bookingId: booking._id,
+              roomNumber: booking.room.roomNumber,
+              roomType: booking.room.roomType,
+              checkIn: booking.checkInDate,
+              checkOut: booking.checkOutDate,
+              totalAmount: booking.totalAmount,
+            });
+            console.log("Confirmation email sent via webhook");
+          } catch (emailError) {
+            console.error("Email failed:", emailError.message);
+          }
+        }
+      }
+    }
 
-//     return res.sendStatus(200);
-//   } catch (error) {
-//     console.error("Webhook error:", error.message);
-//     return res.sendStatus(500);
-//   }
-// };
+    return res.sendStatus(200);
+  } catch (error) {
+    console.error("Webhook error:", error.message);
+    return res.sendStatus(500);
+  }
+};
