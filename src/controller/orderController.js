@@ -4,6 +4,9 @@ import Menu from "../models/Menu.js";
 export const createOrder = async (req, res) => {
   try {
     const { guestId, menuId, quantity } = req.body;
+    if(!guestId || !menuId || !quantity){
+        return res.status(400).send({success: 'false', msg: 'fill required field'})
+    };
 
     // Find the menu item to get its price
     const menuItem = await Menu.findById(menuId);

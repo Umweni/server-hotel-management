@@ -156,27 +156,35 @@ export const verifyPayment = async (req, res) => {
 };
 
 
+
+
 export const paystackWebhook = async (req, res) => {
   try {
     const signature = req.headers["x-paystack-signature"];
-    if (!signature) return res.sendStatus(400);
+    if (!signature) {
+      res.sendStatus(400);
+      return;
+    }
 
     const hash = crypto
       .createHmac("sha512", process.env.PAYSTACK_SECRET_KEY)
       .update(req.rawBody)
       .digest("hex");
 
-    if (hash !== signature) return res.sendStatus(400);
+    if (hash !== signature) {
+      res.sendStatus(400);
+      return;
+    }
 
     const event = req.body;
 
     if (event.event === "charge.success") {
       const { reference } = event.data;
 
-      // Verify transaction with Paystack helper
       const response = await verifyTransaction(reference);
       if (!response.status) {
-        return res.sendStatus(400);
+        res.sendStatus(400);
+        return;
       }
 
       const payment = await Payment.findOne({ reference }).populate("booking");
@@ -212,11 +220,47 @@ export const paystackWebhook = async (req, res) => {
           }
         }
       }
+    } else if (event.event === "charge.failed" || event.event === "payment.failed") {
+      const { reference } = event.data;
+
+      const payment = await Payment.findOne({ reference }).populate("booking");
+
+      if (payment) {
+        payment.status = "failed";
+        await payment.save();
+
+        const booking = await Booking.findById(payment.booking._id)
+          .populate("guest")
+          .populate("room");
+
+        if (booking) {
+          booking.paymentStatus = "unpaid";
+          booking.status = "CANCELLED"; // or "PENDING" depending on your business rules
+          booking.paymentReference = reference;
+          await booking.save();
+
+          try {
+            await sendPaymentFailureNotification({
+              guestName: booking.guest.name,
+              guestEmail: booking.guest.email,
+              bookingId: booking._id,
+              roomNumber: booking.room.roomNumber,
+              roomType: booking.room.roomType,
+              checkIn: booking.checkInDate,
+              checkOut: booking.checkOutDate,
+              totalAmount: booking.totalAmount,
+            });
+            console.log("Failure notification email sent via webhook");
+          } catch (emailError) {
+            console.error("Failure email failed:", emailError.message);
+          }
+        }
+      }
     }
 
-    return res.sendStatus(200);
+    res.sendStatus(200);
   } catch (error) {
     console.error("Webhook error:", error.message);
-    return res.sendStatus(500);
+    res.sendStatus(500);
   }
 };

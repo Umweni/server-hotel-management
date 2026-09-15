@@ -39,7 +39,7 @@ export const createBooking = async (req, res) => {
       checkOutDate: { $gt: checkIn },
     });
     if (overlappingBooking) {
-      return res.status(400).send({ success: false, message: "Room is not available for these dates" });
+      return res.status(400).send({ success: false, message: "The room is fully booked for those dates" });
     }
 
     // Calculate nights and price
@@ -54,7 +54,7 @@ export const createBooking = async (req, res) => {
       checkInDate: checkIn,
       checkOutDate: checkOut,
       totalAmount,
-      status: "CONFIRMED", 
+      status: "PENDING", 
     });
 
     // Mark room unavailable
